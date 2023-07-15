@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Finsights</title>
+</head>
+<body>
+    <h1>Finsights</h1>
+    <hr>
+    {% if result %}
+    <h1>This market will change in the following way {{result}}</h1>
+    {% endif %}
+    <form method="'POST">
+        {% csrf_token %}
+        <input type="text" name="name" placeholder="Enter your name">
+        Date: <input type="date" name="date" placeholder="Enter date">
+        <form name="Key Words">
+            <input type="text" name="key_words" placeholder="Enter financial opinion">
+    </form>
+    
+    <!--add a submit button-->
+    <input type="submit" value="Submit">
+    </form>
+</html>
