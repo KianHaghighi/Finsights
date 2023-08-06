@@ -6,6 +6,8 @@ import yfinance as yf
 import numpy as np
 import matplotlib.pyplot as plt
 from wordcloud import WordCloud
+# Import the SentimentIntensityAnalyzer object
+from nltk.sentiment.vader import SentimentIntensityAnalyzer
 #Roberta Pretrained Model
 import torch
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
@@ -16,27 +18,28 @@ st.title("Welcome to Finsights")
 
 with open('model_pickle', 'rb') as f:
     model = load(f)
+
 #import the price prediction model
 with open('model_price_pickle', 'rb') as f:
     model_price = load(f)
 
-#not recognizing the model_tech_pickle file
-with open('model_tech_pickle', 'rb') as f:
-     model_tech = load(f)
+with(open('model_tech_pickle', 'rb')) as f:
+    model_tech = load(f)
 
-#download stock data from the last 20 days
 #i should change this to? 2 day on the market?
 def download_stock_data(ticker):
     now = datetime.now()
 
     # Calculate the date and time for 10 AM yesterday
-    yesterday = now - timedelta(days=1)
-    user_date = datetime(yesterday.year, yesterday.month, yesterday.day, hour=10, minute=0, second=0)    
-    start_date = user_date - timedelta(days=20)
+    #gets the stock data for the previous day
+    today = datetime.today() - timedelta(days=3)
+    
+    # Calculate the date for the previous day
+    previous_day = today - timedelta(days=2)
     
     try:
         # Fetch real-time stock data using yfinance
-        stock_data = yf.download(ticker, start=start_date, end=user_date)
+        stock_data = yf.download(ticker, start=previous_day, end=today)
 
         # Check if the data is empty
         if stock_data.empty:
@@ -86,6 +89,12 @@ def get_sa_with_vader(text):
             print(f'Broke for stock {my_stock}')
 
 
+#Get the sentiment score
+#Create a function to get the sentiment scores
+def getSIA(text):
+    sia = SentimentIntensityAnalyzer()
+    sentiment = sia.polarity_scores(text)
+    return sentiment
 
 #FUNCTIONS FOR GETTTING THE PREDICTIONS
 def extract_key_features_price(text, stock_symbol):
@@ -98,16 +107,17 @@ def extract_key_features_price(text, stock_symbol):
     # Extract sentiment analysis values from the user input
     subjectivity = sentiment.subjectivity
     polarity = sentiment.polarity
-    compound = sentiment.polarity
-    negative = sentiment.polarity < 0
-    neutral = sentiment.polarity == 0
-    positive = sentiment.polarity > 0
+    compound = []
+    negative = []
+    neutral = []
+    positive = []
+    #instead of df_merge, i have text, so instead of a for loop, i just need to peform the code in the loop once
+    SIA = getSIA(text)
+    compound = (SIA['compound'])
+    negative = SIA['neg']
+    neutral = (SIA['neu'])
+    positive = (SIA['pos'])
 
-    #Extract label from the user input -> Label
-    if negative == True:
-        label = 0
-    else:
-        label = 1
     #Extract daily percent change from the stock data -> Daily_Pct_Change
 
     # Prepare the input features for the regression model
@@ -116,14 +126,26 @@ def extract_key_features_price(text, stock_symbol):
     #Calculate daily percent change
     #this is calculating the daily percent change incorrectly
 
+    #need to implement error checking here
+    #values[0] is the value for the previous day -> Monday
+    #values[1] is the value for the current day -> Tuesday
+    label = predict_sentiment(text, stock_symbol)
+
+    #it seems like the daily percent change is not being calculated correctly
+    #i need to get the percent change from the previous day to the current day
     daily_pct_change = stock_data['Close'].pct_change().values[1]
-    # if math.isnan(daily_pct_change):
-    #     daily_pct_change = 0
+
+    st.write("percent change: ", daily_pct_change)
+    if math.isnan(daily_pct_change):
+        daily_pct_change = 0
     input_features = [stock_data['Open'].values[0], stock_data['High'].values[0],
                       stock_data['Low'].values[0], stock_data['Volume'].values[0],
-                      subjectivity, polarity, compound, negative, neutral, positive, label, daily_pct_change]
+                      subjectivity, polarity, compound, negative, neutral, positive, label, daily_pct_change] 
+    #it appears the last input feature does not affect the predicted_price_change for some reason, the only thing that affects the percent change is the start_date
+
 
     # Convert the input features to a NumPy array and reshape it to match the model input
+    #looks like this turns this into a 2d array
     input_features_array = np.array(input_features).reshape(1, -1)
     #this line is just getting the value 365 days ago, I need to just get the value for the previous day
     #or rather use the extended time in the sma and rsi function
@@ -276,16 +298,25 @@ def main():
     start = end - timedelta(days=365)
     
 
+    if st.button("Get percent change without sentiment"):
+        st.write("percent: ", stock_data['Close'].pct_change().values[1])
     if st.button('Predict Price'):
+        stock_data = download_stock_data(ticker)
         #get the predictions
         sentiment_label_prediction = predict_sentiment(user_input, ticker)
-        stock_price_prediction = predict_price(user_input, ticker)
+        stock_price_change_prediction = predict_price(user_input, ticker)
+        predicted_price = stock_data['Close'].values[0] * (1 + stock_price_change_prediction)
         #output the predictions
         #st.write(f'Predicted Stock Price: {stock_price_prediction:.2f}')
         if sentiment_label_prediction == 0:
             st.write('The stock price will decrease')
         else:
             st.write('The stock price will increase')
+        st.write("Closing price", stock_data['Close'].values[0])
+        st.write("Opening price", stock_data['Open'].values[0])
+        st.write("Volume", stock_data['Volume'].values[0])
+        st.write("Price Prediction: ", predicted_price)
+        st.write("The predicted percent change is: ", stock_price_change_prediction)
         st.write(f'Predicted Sentiment Label: {sentiment_label_prediction}')
     
 
