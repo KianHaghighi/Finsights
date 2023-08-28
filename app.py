@@ -16,26 +16,23 @@ import math
 
 st.title("Welcome to Finsights")
 
-with open('model_pickle', 'rb') as f:
-    model = load(f)
 
 #import the price prediction model
 with open('model_price_pickle', 'rb') as f:
     model_price = load(f)
 
-with(open('model_tech_pickle', 'rb')) as f:
+with open('model_tech_pickle', 'rb') as f:
     model_tech = load(f)
 
-#i should change this to? 2 day on the market?
 def download_stock_data(ticker):
     now = datetime.now()
 
     # Calculate the date and time for 10 AM yesterday
     #gets the stock data for the previous day
-    today = datetime.today() - timedelta(days=3)
+    today = datetime.today()
     
     # Calculate the date for the previous day
-    previous_day = today - timedelta(days=2)
+    previous_day = today - timedelta(days=3)
     
     try:
         # Fetch real-time stock data using yfinance
@@ -95,6 +92,25 @@ def getSIA(text):
     sia = SentimentIntensityAnalyzer()
     sentiment = sia.polarity_scores(text)
     return sentiment
+def get_sentiment_score(text):
+    # Analyze sentiment of the user text using TextBlob
+    blob = TextBlob(text)
+    sentiment = blob.sentiment
+
+    # Extract sentiment analysis values from the user input
+    subjectivity = sentiment.subjectivity
+    polarity = sentiment.polarity
+    compound = []
+    negative = []
+    neutral = []
+    positive = []
+    #instead of df_merge, i have text, so instead of a for loop, i just need to peform the code in the loop once
+    SIA = getSIA(text)
+    compound = (SIA['compound'])
+    negative = SIA['neg']
+    neutral = (SIA['neu'])
+    positive = (SIA['pos'])
+    return compound, negative, neutral, positive
 
 #FUNCTIONS FOR GETTTING THE PREDICTIONS
 def extract_key_features_price(text, stock_symbol):
@@ -114,13 +130,15 @@ def extract_key_features_price(text, stock_symbol):
     #instead of df_merge, i have text, so instead of a for loop, i just need to peform the code in the loop once
     SIA = getSIA(text)
     compound = (SIA['compound'])
-    negative = SIA['neg']
+    negative = (SIA['neg'])
     neutral = (SIA['neu'])
     positive = (SIA['pos'])
+    print("values for sentiment analysis: ")
+    print(compound, negative, neutral, positive)
 
     #Extract daily percent change from the stock data -> Daily_Pct_Change
 
-    # Prepare the input features for the regression model
+    #Prepare the input features for the regression model
     #features i need to have in order to have the PERCENT CHANGE model work:
         #Label and Daily_Pct_Change
     #Calculate daily percent change
@@ -139,10 +157,8 @@ def extract_key_features_price(text, stock_symbol):
     if math.isnan(daily_pct_change):
         daily_pct_change = 0
     input_features = [stock_data['Open'].values[0], stock_data['High'].values[0],
-                      stock_data['Low'].values[0], stock_data['Volume'].values[0],
+                      stock_data['Low'].values[0], -10,
                       subjectivity, polarity, compound, negative, neutral, positive, label, daily_pct_change] 
-    #it appears the last input feature does not affect the predicted_price_change for some reason, the only thing that affects the percent change is the start_date
-
 
     # Convert the input features to a NumPy array and reshape it to match the model input
     #looks like this turns this into a 2d array
@@ -191,9 +207,16 @@ def extract_key_features_sentiment(text, stock_symbol):
 
 def predict_sentiment(text, stock_symbol):
     # Extract the input features for the sentiment prediction model
-    input_features_array = extract_key_features_sentiment(text, stock_symbol)
-    sentiment_prediction = model.predict(input_features_array)
-    return sentiment_prediction[0]
+    # input_features_array = extract_key_features_sentiment(text, stock_symbol)
+    # sentiment_prediction = model.predict(input_features_array)
+    # return sentiment_prediction[0]
+    blob = TextBlob(text)
+    polarity = blob.sentiment.polarity
+
+    if polarity < 0:
+        return 0
+    else:
+        return 1
 
 def predict_price(text, stock_symbol):
     # extract the input features for the price prediction model
@@ -280,7 +303,7 @@ def get_stock_price(ticker, start_date, end_date):
 def main():
     st.title('Sentiment and Stock Price Prediction App')
     data_type = st.selectbox('Type of Financial Data', ['Tweet', 'News'])
-    user_input = st.text_input('Enter a sentence:')
+    user_input = st.text_input('Enter text:')
     user_date = st.date_input('Predict stock price for:')
     ticker = st.text_input('Enter a ticker symbol:')
     submit = st.button('Submit')
@@ -297,7 +320,12 @@ def main():
     end = datetime(yesterday.year, yesterday.month, yesterday.day, hour=10, minute=0, second=0)    
     start = end - timedelta(days=365)
     
-
+    if st.button("Get sentiment scores"):
+        compound, negative, neutral, positive = get_sentiment_score(user_input)
+        st.write("Compound: ", compound)
+        st.write("Negative: ", negative)
+        st.write("Neutral: ", neutral)
+        st.write("Positive: ", positive)
     if st.button("Get percent change without sentiment"):
         st.write("percent: ", stock_data['Close'].pct_change().values[1])
     if st.button('Predict Price'):
@@ -305,7 +333,7 @@ def main():
         #get the predictions
         sentiment_label_prediction = predict_sentiment(user_input, ticker)
         stock_price_change_prediction = predict_price(user_input, ticker)
-        predicted_price = stock_data['Close'].values[0] * (1 + stock_price_change_prediction)
+        predicted_price = stock_data['Close'].values[0] * (1 + stock_price_change_prediction / 100)
         #output the predictions
         #st.write(f'Predicted Stock Price: {stock_price_prediction:.2f}')
         if sentiment_label_prediction == 0:
@@ -316,7 +344,7 @@ def main():
         st.write("Opening price", stock_data['Open'].values[0])
         st.write("Volume", stock_data['Volume'].values[0])
         st.write("Price Prediction: ", predicted_price)
-        st.write("The predicted percent change is: ", stock_price_change_prediction)
+        st.write("The predicted percent change is: ", stock_price_change_prediction / 100)
         st.write(f'Predicted Sentiment Label: {sentiment_label_prediction}')
     
 
@@ -370,4 +398,3 @@ def main():
         plot_sentiment_distribution(user_input)
 if __name__ == '__main__':
     main()
-
