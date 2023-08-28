@@ -28,11 +28,20 @@ def download_stock_data(ticker):
     now = datetime.now()
 
     # Calculate the date and time for 10 AM yesterday
-    #gets the stock data for the previous day
+    # Gets the stock data for the previous day
     today = datetime.today()
     
-    # Calculate the date for the previous day
-    previous_day = today - timedelta(days=3)
+    # Check if today is a weekend (Saturday or Sunday)
+    if today.weekday() == 5:  # Saturday
+        previous_day = today - timedelta(days=1)
+    elif today.weekday() == 6:  # Sunday
+        previous_day = today - timedelta(days=2)
+    else:
+        previous_day = today - timedelta(days=1)
+    
+    # If today is Monday, get data for Friday and Monday
+    if today.weekday() == 0:  # Monday
+        previous_day = today - timedelta(days=3)
     
     try:
         # Fetch real-time stock data using yfinance
@@ -299,12 +308,12 @@ def get_stock_price(ticker, start_date, end_date):
     stock_price = data['Close'].values[0]
     return stock_price
 
+
 #MAIN FUNCTION
 def main():
     st.title('Sentiment and Stock Price Prediction App')
     data_type = st.selectbox('Type of Financial Data', ['Tweet', 'News'])
     user_input = st.text_input('Enter text:')
-    user_date = st.date_input('Predict stock price for:')
     ticker = st.text_input('Enter a ticker symbol:')
     submit = st.button('Submit')
     #Error handling for invalid ticker
@@ -313,14 +322,9 @@ def main():
 
     if stock_data is None:
         st.write("Not a valid ticker. Please enter a valid stock ticker.")
-        return  
-    #get the proper dates
-    now = datetime.now()
-    yesterday = now - timedelta(days=3)
-    end = datetime(yesterday.year, yesterday.month, yesterday.day, hour=10, minute=0, second=0)    
-    start = end - timedelta(days=365)
+        return  # Exit the function to prevent errors
     
-    if st.button("Get sentiment scores"):
+    if st.button("Get Sentiment Scores"):
         compound, negative, neutral, positive = get_sentiment_score(user_input)
         st.write("Compound: ", compound)
         st.write("Negative: ", negative)
