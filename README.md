@@ -6,8 +6,11 @@ How it works:
 
 User Input: Input your text data, such as news articles, social media posts, or financial reports, which are relevant to the stock or market you are interested in.
 Sentiment Analysis: Our sophisticated NLP models analyze the sentiment of the provided text data, giving you a comprehensive understanding of the market sentiment surrounding the stock.
+
 Stock Performance: Finsights then fetches real-time stock data and calculates the change in the stock's value, providing you with valuable information on market trends.
+
 Data Visualizations: To aid in decision-making, the platform generates various data visualizations, including line charts, bar graphs, and pie charts, to present the sentiment analysis results and stock performance in an intuitive and easy-to-understand manner.
+
 Key Features:
 
 Perform sentiment analysis on user-provided text data to gauge market sentiment.
