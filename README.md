@@ -5,7 +5,8 @@ Finights is an advanced data analysis project designed to provide valuable insig
 How it works:
 
 User Input: Input your text data, such as news articles, social media posts, or financial reports, which are relevant to the stock or market you are interested in.
-Sentiment Analysis: Our sophisticated NLP models analyze the sentiment of the provided text data, giving you a comprehensive understanding of the market sentiment surrounding the stock.
+
+Sentiment Analysis: My sophisticated NLP models analyze the sentiment of the provided text data, giving you a comprehensive understanding of the market sentiment surrounding the stock.
 
 Stock Performance: Finsights then fetches real-time stock data and calculates the change in the stock's value, providing you with valuable information on market trends.
 
