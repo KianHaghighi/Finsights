@@ -1,9 +1,10 @@
 **Welcome to Finsights!** 📈📊
 
 ## Table of Contents
--[Description)](#Description)
--[Features](#Features)
--[Installation](#Installation)
+
+  -[Description)](#Description)
+  -[Features](#Features)
+  -[Installation](#Installation)
 
 Finights is an advanced data analysis project designed to provide valuable insights into the financial markets. This powerful tool takes in user-provided text data related to a specific stock or market and performs sentiment analysis using cutting-edge Natural Language Processing (NLP) techniques.
 
