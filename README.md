@@ -41,8 +41,7 @@ cd finsights_app
 ```
 pip install -r requirements.txt
 ```
-'''
 4.Start the project
-'''
+```
 streamlit run app.py
-'''
+```
