@@ -1,13 +1,13 @@
 **Welcome to Finsights!** 📈📊
 
 ## Table of Contents
--[How it Works](#How it works:)
--[Key Features](#Key Features:)
--[Installation](#Installation:)
+-[Description)](#Description)
+-[Features](#Features)
+-[Installation](#Installation)
 
 Finights is an advanced data analysis project designed to provide valuable insights into the financial markets. This powerful tool takes in user-provided text data related to a specific stock or market and performs sentiment analysis using cutting-edge Natural Language Processing (NLP) techniques.
 
-## How it works:
+## Description
 
 User Input: Input your text data, such as news articles, social media posts, or financial reports, which are relevant to the stock or market you are interested in.
 
@@ -17,7 +17,7 @@ Stock Performance: Finsights then fetches real-time stock data and calculates th
 
 Data Visualizations: To aid in decision-making, the platform generates various data visualizations, including line charts, bar graphs, and pie charts, to present the sentiment analysis results and stock performance in an intuitive and easy-to-understand manner.
 
-## Key Features:
+## Features:
 
 Perform sentiment analysis on user-provided text data to gauge market sentiment.
 Fetch real-time stock data and calculate the change in stock value.
