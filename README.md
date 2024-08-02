@@ -36,7 +36,7 @@ git clone https://github.com/KianHaghighi/Finsights
 ```
 2. Navigate to the project directory:
 ```
-cd finsights_app
+cd finsights/finsights_app
 ```
 3.Install the necessary libraries using the requirements.txt file:
 ```
