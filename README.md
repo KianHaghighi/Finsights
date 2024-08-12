@@ -1,5 +1,7 @@
 **Welcome to Finsights!** 📈📊
 
+![image](https://github.com/user-attachments/assets/08d9c97d-596a-4e70-a37b-576e1e4bc6aa)
+
 ## Table of Contents
 
   -[Description)](#Description)
