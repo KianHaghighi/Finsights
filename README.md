@@ -1,6 +1,10 @@
 **Welcome to Finsights!** 📈📊
 
+## Home Page
 ![image](https://github.com/user-attachments/assets/08d9c97d-596a-4e70-a37b-576e1e4bc6aa)
+## Analyze Sentiment Home Page
+![image](https://github.com/user-attachments/assets/88c16edc-4af5-4031-9d3e-256d7328c18a)
+
 
 ## Table of Contents
 
